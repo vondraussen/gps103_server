@@ -32,8 +32,11 @@ const location = new Buffer.from('imei:123456789012345,acc on,190323190955,,F,18
 const locationResult = {
     imei: 123456789012345,
     expectsResponse: false,
+    event: { number: 0x12, string: 'location' },
     info: 'acc on',
     hasFix: true,
+    gpsTime: '2019-03-23T19:09:55.000Z',
+    fixTime: 1553364593,
     lat: 48.93540167,
     lon: 9.49953333,
     speed: 0,
@@ -53,11 +56,11 @@ const locationNoneResult = {
 }
 
 const locationDouble = new Buffer.from('imei:123456789012345,acc on,190323190956,,F,180953.000,A,4856.1241,N,00929.9720,E,0.00,0;imei:123456789012345,acc on,190323190957,,F,180953.000,A,4856.1241,N,00929.9720,E,0.00,0;')
-const locationTripple = new Buffer.from('imei:123456789012345,acc on,190323190958,,F,180953.000,A,4856.1241,N,00929.9720,E,0.00,0;imei:123456789012345,acc on,190323190959,,F,180953.000,A,4856.1241,N,00929.9720,E,0.00,0;imei:123456789012345,acc on,190323191000,,F,180953.000,A,4856.1241,N,00929.9720,E,0.00,0;')
+const locationTriple = new Buffer.from('imei:123456789012345,acc on,190323190958,,F,180953.000,A,4856.1241,N,00929.9720,E,0.00,0;imei:123456789012345,acc on,190323190959,,F,180953.000,A,4856.1241,N,00929.9720,E,0.00,0;imei:123456789012345,acc on,190323191000,,F,180953.000,A,4856.1241,N,00929.9720,E,0.00,0;')
 const locationQuad = new Buffer.from('imei:123456789012345,acc on,190323191001,,F,180953.000,A,4856.1241,N,00929.9720,E,0.00,0;123456789012345;imei:123456789012345,acc on,190323191002,,F,180953.000,A,4856.1241,N,00929.9720,E,0.00,0;imei:123456789012345,acc on,190323191003,,F,180953.000,A,4856.1241,N,00929.9720,E,0.00,0;')
 
 test('Login Test', () => {
-    var gps103 = new Gps103();
+    let gps103 = new Gps103();
     gps103.parse(login);
 
     expect(gps103.imei).toBe(loginResult.imei);
@@ -67,7 +70,7 @@ test('Login Test', () => {
 });
 
 test('Heartbeat Test', () => {
-    var gps103 = new Gps103();
+    let gps103 = new Gps103();
     gps103.parse(login);
     gps103.parse(heartbeat);
 
@@ -78,7 +81,7 @@ test('Heartbeat Test', () => {
 });
 
 test('Alarm/Location Test', () => {
-    var gps103 = new Gps103();
+    let gps103 = new Gps103();
     gps103.parse(login);
     gps103.parse(location);
 
@@ -105,13 +108,23 @@ test('Alarm/Location Test', () => {
 });
 
 test('Multiple Messages Test', () => {
-    var gps103 = new Gps103();
+    let gps103 = new Gps103();
     gps103.parse(location);
     expect(gps103.msgBufferRaw.length).toBe(1);
     gps103.parse(locationDouble);
     expect(gps103.msgBufferRaw.length).toBe(2);
-    gps103.parse(locationTripple);
+    gps103.parse(locationTriple);
     expect(gps103.msgBufferRaw.length).toBe(3);
     gps103.parse(locationQuad);
     expect(gps103.msgBufferRaw.length).toBe(4);
+});
+
+test('Encoding Test', () => {
+    let gps103 = new Gps103();
+    let msg = gps103.encode(loginResult);
+    expect(msg).toStrictEqual(login);
+    msg = gps103.encode(heartbeatResult);
+    expect(msg).toStrictEqual(heartbeat);
+    msg = gps103.encode(locationResult);
+    expect(msg).toStrictEqual(location);
 });

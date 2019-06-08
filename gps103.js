@@ -68,6 +68,39 @@ Gps103.prototype.parse = function (msg) {
     });
 }
 
+Gps103.prototype.encode = function (data) {
+    let msg = "";
+    switch (data.event.number) {
+        case 0x01: // login
+            msg = "##,imei:" + data.imei + ",A;";
+            break;
+        case 0x02: // hearbeat
+            msg = data.imei + ";";
+            break;
+        case 0x12: // location
+            msg = "imei:" + data.imei;
+            msg = appendCsvText(msg, data.info);
+            msg = appendCsvText(msg, encGpsTime(data.gpsTime));
+            msg = appendCsvText(msg, ''); // notSure1 is always ''
+            msg = appendCsvText(msg, encFixType(data.hasFix));
+            msg = appendCsvText(msg, encFixTime(data.fixTime));
+            msg = appendCsvText(msg, 'A'); // notSure2 is always 'A'
+            msg = appendCsvText(msg, encLatitude(data.lat));
+            msg = appendCsvText(msg, encLongitude(data.lon));
+            msg = appendCsvText(msg, data.speed.toFixed(2));
+            msg = appendCsvText(msg, data.course);
+            msg = msg + ';';
+            break;
+        default:
+            break;
+    }
+    return new Buffer.from(msg);
+}
+
+function appendCsvText(string, part) {
+    return string + ',' + part;
+}
+
 function getGpsTime(dateStr) {
     return new Date(Date.UTC(
         parseInt(dateStr.slice(0, 2)) + 2000,
@@ -77,6 +110,27 @@ function getGpsTime(dateStr) {
         parseInt(dateStr.slice(8, 10)),
         parseInt(dateStr.slice(10, 12))
     ));
+}
+
+function encGpsTime(gpsTime) {
+    let dateTime = new Date(gpsTime);
+    let result = addLeadingZero(dateTime.getUTCFullYear() - 2000);
+    result += addLeadingZero(dateTime.getUTCMonth() + 1);
+    result += addLeadingZero(dateTime.getUTCDate());
+    result += addLeadingZero(dateTime.getUTCHours());
+    result += addLeadingZero(dateTime.getUTCMinutes());
+    result += addLeadingZero(dateTime.getUTCSeconds());
+    return result;
+}
+
+function addLeadingZero(number, amount = 1) {
+    let leadZeros = '';
+    for (let i = amount; i > 0; i--) {
+        if (number < Math.pow(10, i)) {
+            leadZeros = leadZeros + '0';
+        }
+    }
+    return leadZeros + number;
 }
 
 function getFixTime(dateStr, timeStr) {
@@ -91,11 +145,27 @@ function getFixTime(dateStr, timeStr) {
     return date.getTime() / 1000;
 }
 
+function encFixTime(timestamp) {
+    let dateTime = new Date();
+    dateTime.setTime(timestamp * 1000);
+    let result = addLeadingZero(dateTime.getUTCHours());
+    result += addLeadingZero(dateTime.getUTCMinutes());
+    result += addLeadingZero(dateTime.getUTCSeconds());
+    return result + '.000';
+}
+
 function getFixType(fL) {
     if (fL === 'F') {
         return 1;
     }
     return 0;
+}
+
+function encFixType(hasFix) {
+    if (hasFix) {
+        return 'F';
+    }
+    return 'L';
 }
 
 function getLatitude(ns, data) {
@@ -126,4 +196,28 @@ function getLongitude(ew, data) {
         lat *= -1;
     }
     return parseFloat(lat.toFixed(8));
+}
+
+function encLatitude(lat) {
+    let charNS = 'N';
+    if (lat < 0) {
+        charNS = 'S';
+    }
+    let dd = parseInt(Math.abs(lat));
+    dd = addLeadingZero(dd);
+    let mm = ((Math.abs(lat) - dd) * 60).toFixed(4);
+    mm = addLeadingZero(mm);
+    return '' + dd + mm + ',' + charNS;
+}
+
+function encLongitude(lon) {
+    let charEW = 'E';
+    if (lon < 0) {
+        charEW = 'W';
+    }
+    let dd = parseInt(Math.abs(lon));
+    dd = addLeadingZero(dd, 2);
+    let mm = ((Math.abs(lon) - dd) * 60).toFixed(4);
+    mm = addLeadingZero(mm);
+    return '' + dd + mm + ',' + charEW;
 }
