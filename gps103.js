@@ -61,7 +61,7 @@ Gps103.prototype.parse = function (msg) {
         parsed.parseTime = Date.now();
         // last message represents the obj state
         // and all go to the buffer for looped forwarding in the app
-        if (idx == (messages.length - 1)) {
+        if (idx === (messages.length - 1)) {
             Object.assign(this, parsed);
         }
         this.msgBuffer.push(parsed);

@@ -6,6 +6,10 @@ Eventually it will send the received information to an MQTT broker.
 So it acts as a server for Gps103 trackers and a gateway to MQTT.
 
 ## Configuration
+Run a `npm install` after you cloned it and start it via `node app.js`.
+
+You can create a `.env` file to configure the behavior off the app.
+
 The following environment variables are recognized. If not defined a default will be used.
 - GPS103_SERVER_PORT=64459
 - MQTT_ROOT_TOPIC=gps103
