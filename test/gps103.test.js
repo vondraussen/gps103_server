@@ -104,18 +104,6 @@ test('Alarm/Location Test', () => {
     expect(gps103.hasFix).toBe(locationNoneResult.hasFix);
 });
 
-// test('Unknown Message Test', () => {
-//     var gps103 = new Gps103();
-//     try {
-//         gps103.parse(unknown);
-//     } catch (e) {
-//         expect(e).toEqual({
-//             error: 'unknown message header',
-//             header: new Buffer.from('7078', 'hex')
-//         });
-//     }
-// });
-
 test('Multiple Messages Test', () => {
     var gps103 = new Gps103();
     gps103.parse(location);

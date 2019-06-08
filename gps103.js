@@ -13,20 +13,17 @@ module.exports = Gps103 = function () {
 Gps103.prototype.parse = function (msg) {
     this.msgBufferRaw.length = 0;
     this.msgBuffer.length = 0;
-    let messages = msg.toString().split(';');
+    let messages = msg.toString().split(';').slice(0, -1); // slice off empty ele
     let loginRegex = /\#\#,imei:(\d{15}),A$/;
     let heartbeatRegex = /^\d{15}$/;
     let alarmRegex = /^imei:\d{15}.*$/;
 
-    messages.forEach(msg => {
-        if (msg === '') {
-            return;
-        }
+    messages.forEach((msg, idx) => {
         this.msgBufferRaw.push(msg);
         let parsed = {};
         // login
         if (loginRegex.test(msg)) {
-            var imei = loginRegex.exec(msg);
+            let imei = loginRegex.exec(msg);
             parsed.imei = parseInt(imei[1]);
             parsed.responseMsg = 'LOAD';
             parsed.expectsResponse = true;
@@ -62,8 +59,12 @@ Gps103.prototype.parse = function (msg) {
             parsed.responseMsg = null;
         }
         parsed.parseTime = Date.now();
+        // last message represents the obj state
+        // and all go to the buffer for looped forwarding in the app
+        if (idx == (messages.length - 1)) {
+            Object.assign(this, parsed);
+        }
         this.msgBuffer.push(parsed);
-        Object.assign(this, parsed);
     });
 }
 
