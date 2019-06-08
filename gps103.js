@@ -61,7 +61,7 @@ Gps103.prototype.parse = function (msg) {
             parsed.event = { number: 0x12, string: 'location' };
             parsed.responseMsg = null;
         }
-
+        parsed.parseTime = Date.now();
         this.msgBuffer.push(parsed);
         Object.assign(this, parsed);
     });
