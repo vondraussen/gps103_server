@@ -7,7 +7,7 @@ So it acts as a server for Gps103 trackers and a gateway to MQTT.
 
 ## Configuration
 The following environment variables are recognized. If not defined a default will be used.
-- Gps103_SERVER_PORT=64459
+- GPS103_SERVER_PORT=64459
 - MQTT_ROOT_TOPIC=gps103
 - MQTT_BROKER_URL=localhost
 - MQTT_BROKER_PORT=1883
