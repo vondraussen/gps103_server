@@ -33,6 +33,14 @@ var server = net.createServer((client) => {
     var gps103 = new Gps103();
     console.log('client connected');
 
+    server.on('error', (err) => {
+        console.error('server error', err);
+    });
+
+    client.on('error', (err) => {
+        console.error('client error', err);
+    });
+
     client.on('close', () => {
         console.log('client disconnected');
     });
