@@ -45,7 +45,7 @@ function loopSenderCb(logFile, gps, socket) {
     console.log(`point[${loopSenderCb.i}]:`,
         gps.encode(logFile[loopSenderCb.i]).toString());
 
-    if (loopSenderCb.i < logFile.length) {
+    if (loopSenderCb.i < logFile.length - 1) {
         loopSenderCb.i++;
     } else {
         loopSenderCb.i = 0;
